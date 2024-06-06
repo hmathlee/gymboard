@@ -20,11 +20,18 @@ def split_video(video_fp: str, frame_dir: str, sample_rate: int = 1):
         exit()
 
     total_frames = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+
     for frame_ct in range(0, total_frames, sample_rate):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_ct)
         ret, frame = video_capture.read()
         video_fname = os.path.basename(video_fp)
-        frame_fname = os.path.splitext(video_fname)[0] + f"_frame_{frame_ct}.jpg"
+
+        # Left-pad filename with some zeros (makes it easier to sequentially annotate)
+        num_leading_zeros = len(str(total_frames)) - len(str(frame_ct))
+
+        # Construct the frame filename
+        frame_fname = "frame_" + "0" * num_leading_zeros + str(frame_ct) + ".jpg"
+        frame_fname = os.path.splitext(video_fname)[0] + frame_fname
         cv2.imwrite(os.path.join(frame_dir, frame_fname), frame)
 
     video_capture.release()
